@@ -50,10 +50,10 @@ Build a settings and navigation menu that overlays the game screen.
 
 ## DS components
 
-| Component | Key | Placement |
-|-----------|-----|-----------|
-| Header | `4d3c237393adbeba5c135a536a1c6943b3ab8ade` | Top bar with X |
-| Switcher | `1f29c51eb8e5cd35dac5da6bfb9b64c6f280ad5e` | Music/Sounds toggles |
+Search by name via `search_design_system(query, fileKey)` where `fileKey` is the **target file**. Filter by `libraryName: "Cruhslab - design system"`. Full keys in `specs/crashlab-game-skills.md`.
+
+- **Header** — Top bar with X
+- **Switcher** — Music/Sounds toggles
 
 ## Visual reference
 

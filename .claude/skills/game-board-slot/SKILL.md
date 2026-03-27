@@ -62,9 +62,9 @@ Load the `figma-use` skill before any `use_figma` call.
 
 **Step 3: Import DS components**
 
-| Component | Component Key |
-|-----------|--------------|
-| Button | `37473b6da3943a3c37d3af6037a147271a5ab30b` |
+Search by name via `search_design_system(query, fileKey)` where `fileKey` is the **target file** you are building in. Filter results by `libraryName: "Cruhslab - design system"`. Full component keys are in `specs/crashlab-game-skills.md`.
+
+Components needed: **Button**
 
 **Step 4: Create local component sets**
 

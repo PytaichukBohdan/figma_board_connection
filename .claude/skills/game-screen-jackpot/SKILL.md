@@ -95,9 +95,9 @@ Build a 3-screen jackpot bonus game flow with local component sets.
 
 ## DS components
 
-| Component | Key | Placement |
-|-----------|-----|-----------|
-| Button | `37473b6da3943a3c37d3af6037a147271a5ab30b` | CTA in all 3 screens |
+Search by name via `search_design_system(query, fileKey)` where `fileKey` is the **target file**. Filter by `libraryName: "Cruhslab - design system"`. Full keys in `specs/crashlab-game-skills.md`.
+
+- **Button** — CTA in all 3 screens
 
 ## Visual references
 

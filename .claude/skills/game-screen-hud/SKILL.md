@@ -69,16 +69,16 @@ Build the standard game heads-up display with header, selection cards, and bet c
 
 ## DS components
 
-| Component | Key | Placement |
-|-----------|-----|-----------|
-| Header | `4d3c237393adbeba5c135a536a1c6943b3ab8ade` | Top bar |
-| Button | `37473b6da3943a3c37d3af6037a147271a5ab30b` | CTA ("START") |
-| Bet button | `c396f2317b315f9a524f6c1d05db4e6d750b6f4f` | Quick-select (1, 2, 5, 10) |
-| Bet stack | `30f14fd215fb15ca0117192a3bc8f847f01d6843` | Amount with +/- |
-| Switcher | `1f29c51eb8e5cd35dac5da6bfb9b64c6f280ad5e` | Auto play toggle |
-| Tab / 32px | `b12f4fa3b88d1b6af3c0d7f55647489ce3722198` | Bet multiplier tabs |
-| Input L | `25f2647b73f6f9ea7360740ff9a611d179b700f9` | Bet amount field |
-| Button icon / 40px | `82664236e76f81598383e8e8db70ae079e8c4239` | +/- buttons |
+Search by name via `search_design_system(query, fileKey)` where `fileKey` is the **target file**. Filter by `libraryName: "Cruhslab - design system"`. Full keys in `specs/crashlab-game-skills.md`.
+
+- **Header** — Top bar
+- **Button** — CTA ("START")
+- **Bet button** — Quick-select (1, 2, 5, 10)
+- **Bet stack** — Amount with +/-
+- **Switcher** — Auto play toggle
+- **Tab / 32px** — Bet multiplier tabs
+- **Input L** — Bet amount field
+- **Button icon / 40px** — +/- buttons
 
 ## Visual references
 

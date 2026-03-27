@@ -37,7 +37,14 @@
 | Drop | `0c94282b842f65e9c1e4b54869246f24f4141260` | component_set | Dropdown selector |
 | Keyboard | `fcaceed0327ffe6b58374bf4f7e40b778d7e9403` | component | Numeric keypad overlay |
 
-**How to import:** Use `search_design_system(query, fileKey)` to find components, then reference them by `componentKey` when creating instances with `use_figma`.
+**How to look up components at runtime:**
+
+1. Call `search_design_system(query="<component name>", fileKey="<target file key>")` — the `fileKey` is the file you are building in (not the library file)
+2. Filter results by `libraryName: "Cruhslab - design system"` to ensure you're using the shared DS
+3. Use the returned `componentKey` when creating instances via `use_figma`
+4. To restrict to this library only, pass `includeLibraryKeys: ["lk-65a310e82d99e2574d53aa7f8ceda223a68c78cbe4bcd11b38f3da66c9f251f4c2fb206576dc99aa89e3fe3c87a1bad1701710bc3d64886ccb38b5bd022be1b5"]`
+
+**Important:** Individual skills list only component names needed, not keys. Use this table as the key reference when building.
 
 ---
 

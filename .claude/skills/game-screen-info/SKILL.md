@@ -68,11 +68,11 @@ Build text-heavy informational screens for game rules and provably fair verifica
 
 ## DS components
 
-| Component | Key | Placement |
-|-----------|-----|-----------|
-| Header | `4d3c237393adbeba5c135a536a1c6943b3ab8ade` | Top bar with X |
-| Input L | `25f2647b73f6f9ea7360740ff9a611d179b700f9` | Seed/hash fields |
-| Drop | `0c94282b842f65e9c1e4b54869246f24f4141260` | "RANDOM" dropdown |
+Search by name via `search_design_system(query, fileKey)` where `fileKey` is the **target file**. Filter by `libraryName: "Cruhslab - design system"`. Full keys in `specs/crashlab-game-skills.md`.
+
+- **Header** — Top bar with X
+- **Input L** — Seed/hash fields
+- **Drop** — "RANDOM" dropdown
 
 ## Visual references
 

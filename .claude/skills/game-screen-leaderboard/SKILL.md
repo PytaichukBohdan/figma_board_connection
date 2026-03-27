@@ -62,10 +62,10 @@ Same structure but rows grouped under date headers:
 
 ## DS components
 
-| Component | Key | Placement |
-|-----------|-----|-----------|
-| Header | `4d3c237393adbeba5c135a536a1c6943b3ab8ade` | Top bar with X close |
-| Tab / 32px | `b12f4fa3b88d1b6af3c0d7f55647489ce3722198` | Period filters (DAY/WEEK/MONTH/ALL) |
+Search by name via `search_design_system(query, fileKey)` where `fileKey` is the **target file**. Filter by `libraryName: "Cruhslab - design system"`. Full keys in `specs/crashlab-game-skills.md`.
+
+- **Header** — Top bar with X close
+- **Tab / 32px** — Period filters (DAY/WEEK/MONTH/ALL)
 
 ## Visual references
 

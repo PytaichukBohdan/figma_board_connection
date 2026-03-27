@@ -87,20 +87,9 @@ Screenshot these nodes from the Avia Aces reference board to understand visual p
 
 **Step 3: Import DS components**
 
-Search the CrashLab design system for these components and import them:
+Search these by name via `search_design_system(query, fileKey)` where `fileKey` is the **target file** you are building in. Filter results by `libraryName: "Cruhslab - design system"`. Full component keys are in `specs/crashlab-game-skills.md`.
 
-| Component | Component Key |
-|-----------|--------------|
-| Header | `4d3c237393adbeba5c135a536a1c6943b3ab8ade` |
-| Button | `37473b6da3943a3c37d3af6037a147271a5ab30b` |
-| Bet button | `c396f2317b315f9a524f6c1d05db4e6d750b6f4f` |
-| Bet stack | `30f14fd215fb15ca0117192a3bc8f847f01d6843` |
-| Switcher | `1f29c51eb8e5cd35dac5da6bfb9b64c6f280ad5e` |
-| Tab / 32px | `b12f4fa3b88d1b6af3c0d7f55647489ce3722198` |
-| Input L | `25f2647b73f6f9ea7360740ff9a611d179b700f9` |
-| Keyboard | `fcaceed0327ffe6b58374bf4f7e40b778d7e9403` |
-| Popup | `b22b514eea035af33c163df5cbd71652a6f2d249` |
-| Drop | `0c94282b842f65e9c1e4b54869246f24f4141260` |
+Components needed: **Header**, **Button**, **Bet button**, **Bet stack**, **Switcher**, **Tab / 32px**, **Input L**, **Keyboard**, **Popup**, **Drop**
 
 **Step 4: Build section by section**
 
