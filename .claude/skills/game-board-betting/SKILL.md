@@ -9,6 +9,10 @@ Build the bottom betting controls: an outer wrapper with an inner card containin
 
 **Load [figma-use](../figma-use/SKILL.md) before any `use_figma` call.**
 
+## Adapt to Context
+
+> **All color values and the font name below are EXAMPLES** from the Avia Aces (indigo/blue) reference board. When building for a different game, derive all theme variables from the game's identity. The betting panel *structure* (dimensions, auto-layout, padding, component hierarchy, shadow offsets/radii) is the reusable pattern. The specific colors, gradient, font, and glow should match the new game.
+
 ## Visual Structure
 
 ```
@@ -19,7 +23,7 @@ Build the bottom betting controls: an outer wrapper with an inner card containin
 | |                                                  | |
 | |  [ 1 ] [ 2 ] [ 5 ] [ 10 ]         32px Tabs     | |
 | |                                                  | |
-| |  ────────── divider ──────────     1px           | |
+| |  ---------- divider ----------     1px           | |
 | |                                                  | |
 | |  Auto play                [=O ]    Switch cell   | |
 | |                                                  | |
@@ -29,25 +33,27 @@ Build the bottom betting controls: an outer wrapper with an inner card containin
 +------------------------------------------------------+
 ```
 
-## Colors (Inline)
+## Theme Variables (define before use)
 
-| Token | Figma 0-1 | Hex |
-|-------|-----------|-----|
-| Surface (indigo/950) | `{ r: 0.122, g: 0.137, b: 0.357 }` | #1f235b |
-| White | `{ r: 1, g: 1, b: 1 }` | #ffffff |
-| Text secondary (indigo/300) | `{ r: 0.643, g: 0.737, b: 0.992 }` | #a4bcfd |
-| Surface subtle (white/6) | `{ r: 1, g: 1, b: 1, a: 0.06 }` | — |
-| Surface border (white/20) | `{ r: 1, g: 1, b: 1, a: 0.2 }` | — |
-| Toggle on (indigo/500) | `{ r: 0.380, g: 0.447, b: 0.953 }` | #6172f3 |
-| Button gradient from | `{ r: 0.082, g: 0.439, b: 0.937 }` | #1570ef |
-| Button gradient to | `{ r: 0.267, g: 0.298, b: 0.906 }` | #444ce7 |
-| Button border | `{ r: 0.643, g: 0.737, b: 0.992 }` | #a4bcfd |
-| Button glow | `{ r: 0.502, g: 0.596, b: 0.976 }` | #8098f9 |
-| Button deep shadow | `{ r: 0.063, g: 0.165, b: 0.337 }` | #102a56 |
+```js
+// ═══ Theme variables — derive these from the game's context ═══
+// Example values shown are from Avia Aces (indigo/blue aviation theme)
+const FONT            = { family: "YOUR_GAME_FONT", style: "Regular" };
+// Example: { family: "Janda Manatee Solid Cyrillic", style: "Regular" }
 
-## Font
-
-**"Janda Manatee Solid Cyrillic"**, Regular. Fallback: "Inter" Regular.
+const SURFACE         = /* derive */;  // Example: { r: 0.122, g: 0.137, b: 0.357 }
+const TEXT_PRIMARY    = /* derive */;  // Example: { r: 1, g: 1, b: 1 }
+const TEXT_SECONDARY  = /* derive */;  // Example: { r: 0.643, g: 0.737, b: 0.992 }
+const TOGGLE_ON_BG    = /* derive */;  // Example: { r: 0.380, g: 0.447, b: 0.953 }
+const ACCENT_FROM     = /* derive */;  // Example: { r: 0.082, g: 0.439, b: 0.937 }
+const ACCENT_TO       = /* derive */;  // Example: { r: 0.267, g: 0.298, b: 0.906 }
+const ACCENT_BORDER   = /* derive */;  // Example: { r: 0.643, g: 0.737, b: 0.992 }
+const ACCENT_GLOW     = /* derive */;  // Example: { r: 0.502, g: 0.596, b: 0.976 }
+const DEEP_SHADOW     = /* derive */;  // Example: { r: 0.063, g: 0.165, b: 0.337 }
+const INNER_HIGHLIGHT = /* derive */;  // Example: { r: 0.780, g: 0.843, b: 0.996 }
+const INNER_SHADOW_C  = /* derive */;  // Example: { r: 0.208, g: 0.220, b: 0.804 }
+const SHADOW_SOFT     = { r: 0.012, g: 0.016, b: 0.031 };  // near-black, usually universal
+```
 
 ## Input Large (48px, inline recipe)
 
@@ -69,7 +75,7 @@ function createInputLarge(amountText) {
   input.paddingTop = 8; input.paddingBottom = 8;
   input.itemSpacing = 8;
   input.cornerRadius = 12;
-  input.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 }, opacity: 0.06 }];
+  input.fills = [{ type: 'SOLID', color: TEXT_PRIMARY, opacity: 0.06 }]; // SURFACE_SUBTLE
 
   // Minus button (32x32, gradient mini)
   const minus = createMiniButton("minus");
@@ -79,8 +85,8 @@ function createInputLarge(amountText) {
   const amount = figma.createText();
   amount.characters = amountText || "$ 10.00";
   amount.fontSize = 20;
-  amount.fontName = { family: "Janda Manatee Solid Cyrillic", style: "Regular" };
-  amount.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
+  amount.fontName = FONT;
+  amount.fills = [{ type: 'SOLID', color: TEXT_PRIMARY }];
   amount.textAlignHorizontal = "CENTER";
   input.appendChild(amount);
   amount.layoutSizingHorizontal = "FILL";
@@ -106,21 +112,22 @@ function createMiniButton(type) {
   btn.counterAxisAlignItems = "CENTER";
   btn.clipsContent = true;
   btn.strokeWeight = 2;
-  btn.strokes = [{ type: 'SOLID', color: { r: 0.643, g: 0.737, b: 0.992 } }];
+  btn.strokes = [{ type: 'SOLID', color: ACCENT_BORDER }];
   btn.fills = [{
     type: 'GRADIENT_LINEAR',
     gradientStops: [
-      { position: 0, color: { r: 0.082, g: 0.439, b: 0.937, a: 1 } },
-      { position: 1, color: { r: 0.267, g: 0.298, b: 0.906, a: 1 } }
+      { position: 0, color: { ...ACCENT_FROM, a: 1 } },
+      { position: 1, color: { ...ACCENT_TO, a: 1 } }
     ],
     gradientTransform: [[0, 1, 0], [-1, 0, 1]]
   }];
+  // Shadow stack — same structure as main button, colors from theme
   btn.effects = [
-    { type: 'DROP_SHADOW', color: { r: 0.012, g: 0.016, b: 0.031, a: 0.3 }, offset: { x: 0, y: 4 }, radius: 3, visible: true },
-    { type: 'DROP_SHADOW', color: { r: 0.063, g: 0.165, b: 0.337, a: 1 }, offset: { x: 0, y: 2 }, radius: 0, visible: true },
-    { type: 'DROP_SHADOW', color: { r: 0.502, g: 0.596, b: 0.976, a: 1 }, offset: { x: 0, y: 0 }, radius: 22, visible: true },
-    { type: 'INNER_SHADOW', color: { r: 0.780, g: 0.843, b: 0.996, a: 1 }, offset: { x: 0, y: 3 }, radius: 1, visible: true },
-    { type: 'INNER_SHADOW', color: { r: 0.208, g: 0.220, b: 0.804, a: 1 }, offset: { x: 0, y: -3 }, radius: 1, visible: true },
+    { type: 'DROP_SHADOW', color: { ...SHADOW_SOFT, a: 0.3 }, offset: { x: 0, y: 4 }, radius: 3, visible: true },
+    { type: 'DROP_SHADOW', color: { ...DEEP_SHADOW, a: 1 }, offset: { x: 0, y: 2 }, radius: 0, visible: true },
+    { type: 'DROP_SHADOW', color: { ...ACCENT_GLOW, a: 1 }, offset: { x: 0, y: 0 }, radius: 22, visible: true },
+    { type: 'INNER_SHADOW', color: { ...INNER_HIGHLIGHT, a: 1 }, offset: { x: 0, y: 3 }, radius: 1, visible: true },
+    { type: 'INNER_SHADOW', color: { ...INNER_SHADOW_C, a: 1 }, offset: { x: 0, y: -3 }, radius: 1, visible: true },
   ];
 
   // Icon placeholder 20x20 (minus line or plus cross)
@@ -148,10 +155,10 @@ function createSwitcher(isOn) {
   sw.paddingTop = 2; sw.paddingBottom = 2;
 
   if (isOn) {
-    sw.fills = [{ type: 'SOLID', color: { r: 0.380, g: 0.447, b: 0.953 } }];
+    sw.fills = [{ type: 'SOLID', color: TOGGLE_ON_BG }];
     sw.primaryAxisAlignItems = "MAX";
   } else {
-    sw.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 }, opacity: 0.06 }];
+    sw.fills = [{ type: 'SOLID', color: TEXT_PRIMARY, opacity: 0.06 }]; // SURFACE_SUBTLE
     sw.primaryAxisAlignItems = "MIN";
   }
 
@@ -166,7 +173,7 @@ function createSwitcher(isOn) {
   knob.name = "Knob";
   knob.resize(26, 20);
   knob.cornerRadius = 10;
-  knob.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
+  knob.fills = [{ type: 'SOLID', color: TEXT_PRIMARY }];
   sw.appendChild(knob);
 
   if (!isOn) {
@@ -183,11 +190,7 @@ function createSwitcher(isOn) {
 ## Full Betting Panel Construction
 
 ```js
-await figma.loadFontAsync({ family: "Janda Manatee Solid Cyrillic", style: "Regular" });
-
-const SURFACE = { r: 0.122, g: 0.137, b: 0.357 };
-const WHITE = { r: 1, g: 1, b: 1 };
-const SECONDARY = { r: 0.643, g: 0.737, b: 0.992 };
+await figma.loadFontAsync(FONT);
 
 // ── Outer wrapper (8px padding) ──
 const outer = figma.createFrame();
@@ -233,7 +236,7 @@ tabRow.layoutSizingHorizontal = "FILL";
   tab.counterAxisAlignItems = "CENTER";
   tab.resize(1, 32);
   tab.cornerRadius = 12;
-  tab.fills = [{ type: 'SOLID', color: WHITE, opacity: 0.06 }];
+  tab.fills = [{ type: 'SOLID', color: TEXT_PRIMARY, opacity: 0.06 }]; // SURFACE_SUBTLE
   tab.paddingLeft = 12; tab.paddingRight = 12;
   tabRow.appendChild(tab);
   tab.layoutSizingHorizontal = "FILL";
@@ -241,8 +244,8 @@ tabRow.layoutSizingHorizontal = "FILL";
   const lbl = figma.createText();
   lbl.characters = val;
   lbl.fontSize = 14;
-  lbl.fontName = { family: "Janda Manatee Solid Cyrillic", style: "Regular" };
-  lbl.fills = [{ type: 'SOLID', color: WHITE }];
+  lbl.fontName = FONT;
+  lbl.fills = [{ type: 'SOLID', color: TEXT_PRIMARY }];
   lbl.textAlignHorizontal = "CENTER";
   tab.appendChild(lbl);
 });
@@ -251,7 +254,7 @@ tabRow.layoutSizingHorizontal = "FILL";
 const divider = figma.createFrame();
 divider.name = "Divider";
 divider.resize(1, 1);
-divider.fills = [{ type: 'SOLID', color: WHITE, opacity: 0.06 }];
+divider.fills = [{ type: 'SOLID', color: TEXT_PRIMARY, opacity: 0.06 }]; // SURFACE_DIVIDER
 inner.appendChild(divider);
 divider.layoutSizingHorizontal = "FILL";
 
@@ -268,8 +271,8 @@ switchRow.layoutSizingHorizontal = "FILL";
 const autoLabel = figma.createText();
 autoLabel.characters = "Auto play";
 autoLabel.fontSize = 16;
-autoLabel.fontName = { family: "Janda Manatee Solid Cyrillic", style: "Regular" };
-autoLabel.fills = [{ type: 'SOLID', color: SECONDARY }];
+autoLabel.fontName = FONT;
+autoLabel.fills = [{ type: 'SOLID', color: TEXT_SECONDARY }];
 switchRow.appendChild(autoLabel);
 autoLabel.layoutSizingHorizontal = "FILL";
 
@@ -286,21 +289,22 @@ cta.resize(1, 56);
 cta.cornerRadius = 16;
 cta.clipsContent = true;
 cta.strokeWeight = 2;
-cta.strokes = [{ type: 'SOLID', color: { r: 0.643, g: 0.737, b: 0.992 } }];
+cta.strokes = [{ type: 'SOLID', color: ACCENT_BORDER }];
 cta.fills = [{
   type: 'GRADIENT_LINEAR',
   gradientStops: [
-    { position: 0, color: { r: 0.082, g: 0.439, b: 0.937, a: 1 } },
-    { position: 1, color: { r: 0.267, g: 0.298, b: 0.906, a: 1 } }
+    { position: 0, color: { ...ACCENT_FROM, a: 1 } },
+    { position: 1, color: { ...ACCENT_TO, a: 1 } }
   ],
   gradientTransform: [[0, 1, 0], [-1, 0, 1]]
 }];
+// Shadow stack — structure is reusable, colors from theme
 cta.effects = [
-  { type: 'DROP_SHADOW', color: { r: 0.012, g: 0.016, b: 0.031, a: 0.3 }, offset: { x: 0, y: 4 }, radius: 3, visible: true },
-  { type: 'DROP_SHADOW', color: { r: 0.063, g: 0.165, b: 0.337, a: 1 }, offset: { x: 0, y: 2 }, radius: 0, visible: true },
-  { type: 'DROP_SHADOW', color: { r: 0.502, g: 0.596, b: 0.976, a: 1 }, offset: { x: 0, y: 0 }, radius: 30, visible: true },
-  { type: 'INNER_SHADOW', color: { r: 0.780, g: 0.843, b: 0.996, a: 1 }, offset: { x: 0, y: 3 }, radius: 1, visible: true },
-  { type: 'INNER_SHADOW', color: { r: 0.208, g: 0.220, b: 0.804, a: 1 }, offset: { x: 0, y: -3 }, radius: 1, visible: true },
+  { type: 'DROP_SHADOW', color: { ...SHADOW_SOFT, a: 0.3 }, offset: { x: 0, y: 4 }, radius: 3, visible: true },
+  { type: 'DROP_SHADOW', color: { ...DEEP_SHADOW, a: 1 }, offset: { x: 0, y: 2 }, radius: 0, visible: true },
+  { type: 'DROP_SHADOW', color: { ...ACCENT_GLOW, a: 1 }, offset: { x: 0, y: 0 }, radius: 30, visible: true },
+  { type: 'INNER_SHADOW', color: { ...INNER_HIGHLIGHT, a: 1 }, offset: { x: 0, y: 3 }, radius: 1, visible: true },
+  { type: 'INNER_SHADOW', color: { ...INNER_SHADOW_C, a: 1 }, offset: { x: 0, y: -3 }, radius: 1, visible: true },
 ];
 inner.appendChild(cta);
 cta.layoutSizingHorizontal = "FILL";
@@ -308,8 +312,8 @@ cta.layoutSizingHorizontal = "FILL";
 const ctaLabel = figma.createText();
 ctaLabel.characters = "BET";
 ctaLabel.fontSize = 20;
-ctaLabel.fontName = { family: "Janda Manatee Solid Cyrillic", style: "Regular" };
-ctaLabel.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
+ctaLabel.fontName = FONT;
+ctaLabel.fills = [{ type: 'SOLID', color: TEXT_PRIMARY }];
 ctaLabel.textCase = "UPPER";
 cta.appendChild(ctaLabel);
 
@@ -319,9 +323,9 @@ return { bettingPanelId: outer.id };
 ## Assembly Notes
 
 - Outer wrapper is 375px wide with 8px padding on all sides, transparent fill (background shows through).
-- Inner card is FILL width, surface-colored, cornerRadius 16.
-- Input Large: 48px tall, FILL width, white/6 background, +/- mini buttons (32x32, gradient fill with full shadow stack).
-- Quick-pick tabs: 4 equal-width tabs at 32px height, each FILL horizontal, white/6 background, 12px corner radius.
-- Divider: 1px tall, FILL width, white/6.
-- Switch cell row: "Auto play" label (flex grow) + switcher (47x24).
-- CTA button: 56px tall, FILL width, gradient fill with the full button shadow stack (same as game-board-button Palette A).
+- Inner card is FILL width, SURFACE-colored, cornerRadius 16.
+- Input Large: 48px tall, FILL width, SURFACE_SUBTLE background, +/- mini buttons (32x32, gradient fill with full shadow stack from theme).
+- Quick-pick tabs: 4 equal-width tabs at 32px height, each FILL horizontal, SURFACE_SUBTLE background, 12px corner radius.
+- Divider: 1px tall, FILL width, SURFACE_DIVIDER.
+- Switch cell row: "Auto play" label (flex grow, TEXT_SECONDARY) + switcher (47x24).
+- CTA button: 56px tall, FILL width, gradient fill with the full button shadow stack (colors from theme).

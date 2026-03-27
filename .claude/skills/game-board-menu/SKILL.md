@@ -9,6 +9,10 @@ Build the full-screen game menu panel: a glowing card with toggle rows (Music, G
 
 **Load [figma-use](../figma-use/SKILL.md) before any `use_figma` call.**
 
+## Adapt to Context
+
+> **All color values and the font name below are EXAMPLES** from the Avia Aces (indigo/blue) reference board. When building for a different game, derive all theme variables from the game's identity. The menu *structure* (panel layout, row patterns, switcher dimensions, section dividers) is the reusable pattern. The specific colors, font, and glow should match the new game.
+
 ## Visual Structure
 
 ```
@@ -19,7 +23,7 @@ Build the full-screen game menu panel: a glowing card with toggle rows (Music, G
 |  [icon]  Music                 [=O ] 16px|
 |  [icon]  Game Sounds           [=O ] 16px|
 |  [icon]  UI Sounds             [=O ] 16px|
-|------ divider (white/6) ----------------|
+|------ divider (SURFACE_DIVIDER) ---------|
 | Navigation                               |
 |  [icon]  My Bets                    [>]  |
 |  [icon]  Leaderboard                [>]  |
@@ -31,26 +35,21 @@ Build the full-screen game menu panel: a glowing card with toggle rows (Music, G
 +-------------------------------------------+
 ```
 
-## Colors (Inline)
-
-| Token | Figma 0-1 | Hex |
-|-------|-----------|-----|
-| Surface (indigo/950) | `{ r: 0.122, g: 0.137, b: 0.357 }` | #1f235b |
-| White | `{ r: 1, g: 1, b: 1 }` | #ffffff |
-| Text secondary (indigo/300) | `{ r: 0.643, g: 0.737, b: 0.992 }` | #a4bcfd |
-| Surface subtle (white/6) | `{ r: 1, g: 1, b: 1, a: 0.06 }` | — |
-| Surface border (white/20) | `{ r: 1, g: 1, b: 1, a: 0.2 }` | — |
-| Toggle on (indigo/500) | `{ r: 0.380, g: 0.447, b: 0.953 }` | #6172f3 |
-| Toggle off knob | `{ r: 1, g: 1, b: 1 }` | — |
-| Glow color (blue/600) | `{ r: 0.082, g: 0.439, b: 0.937 }` | #1570ef |
-| Page background | `{ r: 0.094, g: 0.059, b: 0.502 }` | #180f80 |
-
-## Font
-
-All text: **"Janda Manatee Solid Cyrillic"**, Regular. Fallback: "Inter" Regular.
+## Theme Variables (define before use)
 
 ```js
-await figma.loadFontAsync({ family: "Janda Manatee Solid Cyrillic", style: "Regular" });
+// ═══ Theme variables — derive these from the game's context ═══
+// Example values shown are from Avia Aces (indigo/blue aviation theme)
+const FONT           = { family: "YOUR_GAME_FONT", style: "Regular" };
+// Example: { family: "Janda Manatee Solid Cyrillic", style: "Regular" }
+
+const SURFACE        = /* derive */;  // Example: { r: 0.122, g: 0.137, b: 0.357 } (#1f235b)
+const TEXT_PRIMARY   = /* derive */;  // Example: { r: 1, g: 1, b: 1 } (white)
+const TEXT_SECONDARY = /* derive */;  // Example: { r: 0.643, g: 0.737, b: 0.992 } (#a4bcfd)
+const TOGGLE_ON_BG   = /* derive */;  // Example: { r: 0.380, g: 0.447, b: 0.953 } (#6172f3)
+const ACCENT_GLOW    = /* derive */;  // Example: { r: 0.082, g: 0.439, b: 0.937 } (#1570ef)
+// SURFACE_SUBTLE:    { ...TEXT_PRIMARY, a: 0.06 }  — usually universal for dark themes
+// SURFACE_DIVIDER:   { ...TEXT_PRIMARY, a: 0.06 }  — same
 ```
 
 ## Switcher Component (47x24, inline recipe)
@@ -76,10 +75,10 @@ function createSwitcher(isOn) {
   sw.paddingTop = 2; sw.paddingBottom = 2;
 
   if (isOn) {
-    sw.fills = [{ type: 'SOLID', color: { r: 0.380, g: 0.447, b: 0.953 } }]; // indigo/500
+    sw.fills = [{ type: 'SOLID', color: TOGGLE_ON_BG }];
     sw.primaryAxisAlignItems = "MAX"; // knob right
   } else {
-    sw.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 }, opacity: 0.06 }];
+    sw.fills = [{ type: 'SOLID', color: TEXT_PRIMARY, opacity: 0.06 }]; // SURFACE_SUBTLE
     sw.primaryAxisAlignItems = "MIN"; // knob left
   }
 
@@ -98,7 +97,7 @@ function createSwitcher(isOn) {
   knob.name = "Knob";
   knob.resize(26, 20);
   knob.cornerRadius = 10; // fully rounded
-  knob.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
+  knob.fills = [{ type: 'SOLID', color: TEXT_PRIMARY }];
   sw.appendChild(knob);
 
   if (!isOn) {
@@ -125,7 +124,7 @@ function createCaretRight() {
     windingRule: "NONZERO",
     data: "M 1 0 L 7 7 L 1 14"
   }];
-  caret.strokes = [{ type: 'SOLID', color: { r: 0.643, g: 0.737, b: 0.992 } }];
+  caret.strokes = [{ type: 'SOLID', color: TEXT_SECONDARY }];
   caret.strokeWeight = 2;
   caret.strokeCap = "ROUND";
   caret.strokeJoin = "ROUND";
@@ -137,13 +136,7 @@ function createCaretRight() {
 ## Full Menu Panel Construction
 
 ```js
-await figma.loadFontAsync({ family: "Janda Manatee Solid Cyrillic", style: "Regular" });
-
-const SURFACE = { r: 0.122, g: 0.137, b: 0.357 };
-const WHITE = { r: 1, g: 1, b: 1 };
-const SECONDARY = { r: 0.643, g: 0.737, b: 0.992 };
-const SUBTLE = { r: 1, g: 1, b: 1 }; // used with opacity 0.06
-const GLOW = { r: 0.082, g: 0.439, b: 0.937 };
+await figma.loadFontAsync(FONT);
 
 // ── Panel wrapper ──
 const panel = figma.createFrame();
@@ -157,15 +150,15 @@ panel.paddingTop = 16; panel.paddingBottom = 16;
 panel.itemSpacing = 0;
 panel.fills = [{ type: 'SOLID', color: SURFACE }];
 panel.effects = [
-  { type: 'DROP_SHADOW', color: { ...GLOW, a: 0.4 }, offset: { x: 0, y: 0 }, radius: 36, visible: true }
+  { type: 'DROP_SHADOW', color: { ...ACCENT_GLOW, a: 0.4 }, offset: { x: 0, y: 0 }, radius: 36, visible: true }
 ];
 
 // ── Title ──
 const title = figma.createText();
 title.characters = "MENU";
 title.fontSize = 24;
-title.fontName = { family: "Janda Manatee Solid Cyrillic", style: "Regular" };
-title.fills = [{ type: 'SOLID', color: WHITE }];
+title.fontName = FONT;
+title.fills = [{ type: 'SOLID', color: TEXT_PRIMARY }];
 title.textCase = "UPPER";
 title.textAlignHorizontal = "CENTER";
 panel.appendChild(title);
@@ -182,7 +175,7 @@ function createSettingsRow(labelText, isOn) {
   row.itemSpacing = 12;
   row.fills = [];
   // Bottom border
-  row.strokes = [{ type: 'SOLID', color: { ...WHITE, a: 0.06 } }];
+  row.strokes = [{ type: 'SOLID', color: { ...TEXT_PRIMARY, a: 0.06 } }]; // SURFACE_DIVIDER
   row.strokeBottomWeight = 1;
   row.strokeTopWeight = 0; row.strokeLeftWeight = 0; row.strokeRightWeight = 0;
 
@@ -191,15 +184,15 @@ function createSettingsRow(labelText, isOn) {
   icon.name = "Icon";
   icon.resize(20, 20);
   icon.cornerRadius = 4;
-  icon.fills = [{ type: 'SOLID', color: { ...WHITE, a: 0.1 } }];
+  icon.fills = [{ type: 'SOLID', color: { ...TEXT_PRIMARY, a: 0.1 } }];
   row.appendChild(icon);
 
   // Label (flex grow)
   const lbl = figma.createText();
   lbl.characters = labelText;
   lbl.fontSize = 16;
-  lbl.fontName = { family: "Janda Manatee Solid Cyrillic", style: "Regular" };
-  lbl.fills = [{ type: 'SOLID', color: WHITE }];
+  lbl.fontName = FONT;
+  lbl.fills = [{ type: 'SOLID', color: TEXT_PRIMARY }];
   row.appendChild(lbl);
   lbl.layoutSizingHorizontal = "FILL";
 
@@ -226,15 +219,15 @@ function createNavRow(labelText) {
   icon.name = "Icon";
   icon.resize(20, 20);
   icon.cornerRadius = 4;
-  icon.fills = [{ type: 'SOLID', color: { ...WHITE, a: 0.1 } }];
+  icon.fills = [{ type: 'SOLID', color: { ...TEXT_PRIMARY, a: 0.1 } }];
   row.appendChild(icon);
 
   // Label (flex grow)
   const lbl = figma.createText();
   lbl.characters = labelText;
   lbl.fontSize = 16;
-  lbl.fontName = { family: "Janda Manatee Solid Cyrillic", style: "Regular" };
-  lbl.fills = [{ type: 'SOLID', color: WHITE }];
+  lbl.fontName = FONT;
+  lbl.fills = [{ type: 'SOLID', color: TEXT_PRIMARY }];
   row.appendChild(lbl);
   lbl.layoutSizingHorizontal = "FILL";
 
@@ -263,7 +256,7 @@ settingsSection.appendChild(createSettingsRow("UI Sounds", false));
 const divider = figma.createFrame();
 divider.name = "Divider";
 divider.resize(327, 1);
-divider.fills = [{ type: 'SOLID', color: SUBTLE, opacity: 0.06 }];
+divider.fills = [{ type: 'SOLID', color: TEXT_PRIMARY, opacity: 0.06 }]; // SURFACE_DIVIDER
 panel.appendChild(divider);
 divider.layoutSizingHorizontal = "FILL";
 
@@ -287,8 +280,8 @@ navSection.appendChild(createNavRow("Provably Fair"));
 const footer = figma.createText();
 footer.characters = "Powered by CrashLab";
 footer.fontSize = 12;
-footer.fontName = { family: "Janda Manatee Solid Cyrillic", style: "Regular" };
-footer.fills = [{ type: 'SOLID', color: SECONDARY }];
+footer.fontName = FONT;
+footer.fills = [{ type: 'SOLID', color: TEXT_SECONDARY }];
 footer.textAlignHorizontal = "CENTER";
 panel.appendChild(footer);
 footer.layoutSizingHorizontal = "FILL";
@@ -299,10 +292,10 @@ return { panelId: panel.id };
 ## Assembly Notes
 
 - The panel is 359px wide (fitting inside a 375px mobile frame with 8px horizontal margin).
-- The glow shadow uses blue/600 at 40% opacity, 36px radius, zero offset.
-- Each settings row has a bottom border of white/6 (1px).
-- The divider between settings and navigation is a 1px solid frame at white/6.
-- Switcher ON state: indigo/500 background, knob pushed right via spacer.
-- Switcher OFF state: white/6 background, knob pushed left.
-- Caret right is a simple chevron vector, 8x14, stroked with indigo/300.
-- Icon placeholders (20x20) are semi-transparent white frames; replace with actual SVG icons after construction.
+- The glow shadow uses the ACCENT_GLOW color at 40% opacity, 36px radius, zero offset.
+- Each settings row has a bottom border of SURFACE_DIVIDER (1px).
+- The divider between settings and navigation is a 1px solid frame at SURFACE_DIVIDER.
+- Switcher ON state: TOGGLE_ON_BG background, knob pushed right via spacer.
+- Switcher OFF state: SURFACE_SUBTLE background, knob pushed left.
+- Caret right is a simple chevron vector, 8x14, stroked with TEXT_SECONDARY.
+- Icon placeholders (20x20) are semi-transparent frames; replace with actual SVG icons after construction.

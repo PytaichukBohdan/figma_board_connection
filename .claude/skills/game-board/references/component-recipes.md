@@ -1,8 +1,10 @@
 # Component Construction Recipes
 
-Every component below can be built entirely from Figma primitives. Each recipe gives the exact Plugin API properties to set. Colors reference theme tokens from [theme-system.md](theme-system.md) — substitute the appropriate palette.
+Every component below can be built entirely from Figma primitives. Each recipe gives the exact Plugin API properties to set. Colors reference theme tokens from [theme-system.md](theme-system.md).
 
-> **Convention**: All examples use Palette A (Avia Aces / indigo) tokens. For Palette B (Bumblebee / green), swap the color values per theme-system.md.
+## Adapt to Context
+
+> **All color values and font names in the code snippets below are EXAMPLES** from the Avia Aces (indigo/blue) reference board. When building for a different game, replace every theme variable with values derived from the game's identity. The structural patterns (dimensions, auto-layout modes, padding, spacing, shadow offsets/radii) are the reusable part. See [theme-system.md](theme-system.md) for how to create a game-specific palette.
 
 ---
 
@@ -28,23 +30,42 @@ Every component below can be built entirely from Figma primitives. Each recipe g
 
 The main action button used for "Start", "Place Bet", "Confirm", etc.
 
-### Palette A (Avia Aces) — Indigo/Blue
+### Theme Variables (define before use)
+
+```js
+// ═══ Theme variables — derive these from the game's context ═══
+// Example values shown are from Avia Aces (indigo/blue aviation theme)
+const FONT            = { family: "YOUR_GAME_FONT", style: "Regular" };
+const ACCENT_FROM     = { r: 0.082, g: 0.439, b: 0.937 };  // Example: blue/600
+const ACCENT_TO       = { r: 0.267, g: 0.298, b: 0.906 };  // Example: indigo/600
+const ACCENT_BORDER   = { r: 0.643, g: 0.737, b: 0.992 };  // Example: indigo/300
+const ACCENT_GLOW     = { r: 0.502, g: 0.596, b: 0.976 };  // Example: indigo/400
+const DEEP_SHADOW     = { r: 0.063, g: 0.165, b: 0.337 };  // Example: blue/950
+const INNER_HIGHLIGHT = { r: 0.780, g: 0.843, b: 0.996 };  // Example: indigo/200
+const INNER_SHADOW_C  = { r: 0.208, g: 0.220, b: 0.804 };  // Example: indigo/700
+const SHADOW_SOFT     = { r: 0.012, g: 0.016, b: 0.031 };  // Example: near-black
+const TEXT_PRIMARY    = { r: 1, g: 1, b: 1 };               // Usually white
+```
+
+### Construction
 
 ```js
 // Build a primary CTA button
+await figma.loadFontAsync(FONT);
+
 const btn = figma.createFrame();
 btn.name = "Button";
 btn.layoutMode = "HORIZONTAL";
 btn.primaryAxisAlignItems = "CENTER";
 btn.counterAxisAlignItems = "CENTER";
-btn.resize(339, 56);  // Standard: 339x56. Large (Bumblebee): 337.5x104
+btn.resize(339, 56);  // Standard: 339x56. Large variant: ~337.5x104
 btn.paddingLeft = 24; btn.paddingRight = 24;
 btn.paddingTop = 16; btn.paddingBottom = 16;
 btn.itemSpacing = 12;
 btn.cornerRadius = 16;  // Standard: 16. Large: 12
 btn.clipsContent = true;
 btn.strokeWeight = 2;
-btn.strokes = [{ type: 'SOLID', color: { r: 0.643, g: 0.737, b: 0.992 } }]; // indigo/300
+btn.strokes = [{ type: 'SOLID', color: ACCENT_BORDER }];
 
 // Background gradient (absolute-positioned inner frame)
 const bgFill = figma.createFrame();
@@ -54,8 +75,8 @@ bgFill.constraints = { horizontal: "STRETCH", vertical: "STRETCH" };
 bgFill.fills = [{
   type: 'GRADIENT_LINEAR',
   gradientStops: [
-    { position: 0, color: { r: 0.082, g: 0.439, b: 0.937, a: 1 } },  // blue/600
-    { position: 1, color: { r: 0.267, g: 0.298, b: 0.906, a: 1 } }   // indigo/600
+    { position: 0, color: { ...ACCENT_FROM, a: 1 } },
+    { position: 1, color: { ...ACCENT_TO, a: 1 } }
   ],
   gradientTransform: [[0, 1, 0], [-1, 0, 1]]  // top to bottom
 }];
@@ -63,40 +84,31 @@ btn.appendChild(bgFill);
 // Position bgFill absolutely behind content (layoutPositioning = "ABSOLUTE")
 
 // Button text
-await figma.loadFontAsync({ family: "Janda Manatee Solid Cyrillic", style: "Regular" });
 const label = figma.createText();
 label.characters = "START";
 label.fontSize = 20;
-label.fontName = { family: "Janda Manatee Solid Cyrillic", style: "Regular" };
-label.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
+label.fontName = FONT;
+label.fills = [{ type: 'SOLID', color: TEXT_PRIMARY }];
 label.textCase = "UPPER";
 btn.appendChild(label);
 
-// Shadows (apply to btn frame)
+// Shadow stack — structure is reusable, colors come from theme
 btn.effects = [
-  { type: 'DROP_SHADOW', color: { r: 0.012, g: 0.016, b: 0.031, a: 0.3 }, offset: { x: 0, y: 4 }, radius: 3, visible: true },
-  { type: 'DROP_SHADOW', color: { r: 0.063, g: 0.165, b: 0.337, a: 1 }, offset: { x: 0, y: 2 }, radius: 0, visible: true },
-  { type: 'DROP_SHADOW', color: { r: 0.502, g: 0.596, b: 0.976, a: 1 }, offset: { x: 0, y: 0 }, radius: 30, visible: true },
-  { type: 'INNER_SHADOW', color: { r: 0.780, g: 0.843, b: 0.996, a: 1 }, offset: { x: 0, y: 3 }, radius: 1, visible: true },
-  { type: 'INNER_SHADOW', color: { r: 0.208, g: 0.220, b: 0.804, a: 1 }, offset: { x: 0, y: -3 }, radius: 1, visible: true },
+  { type: 'DROP_SHADOW', color: { ...SHADOW_SOFT, a: 0.3 }, offset: { x: 0, y: 4 }, radius: 3, visible: true },
+  { type: 'DROP_SHADOW', color: { ...DEEP_SHADOW, a: 1 }, offset: { x: 0, y: 2 }, radius: 0, visible: true },
+  { type: 'DROP_SHADOW', color: { ...ACCENT_GLOW, a: 1 }, offset: { x: 0, y: 0 }, radius: 30, visible: true },
+  { type: 'INNER_SHADOW', color: { ...INNER_HIGHLIGHT, a: 1 }, offset: { x: 0, y: 3 }, radius: 1, visible: true },
+  { type: 'INNER_SHADOW', color: { ...INNER_SHADOW_C, a: 1 }, offset: { x: 0, y: -3 }, radius: 1, visible: true },
 ];
 
 return { buttonId: btn.id };
 ```
 
-### Palette B (Bumblebee) — Green
+### Adapting Button Size
 
-Same structure, swap these values:
-- **Size**: 337.5 x 104 (larger)
-- **Corner radius**: 12
-- **Stroke color**: `{ r: 0.082, g: 0.161, b: 0.039 }` (green-light/950)
-- **Gradient from**: `{ r: 0.400, g: 0.776, b: 0.110 }` (green-light/500)
-- **Gradient to**: `{ r: 0.035, g: 0.573, b: 0.314 }` (green/600)
-- **Font size**: 32px
-- **Outer shadows**: warm tones (see theme-system.md Palette B)
-- **Glow**: `{ r: 0.235, g: 0.796, b: 0.498 }` at 30px (green/400)
-- **Inner highlight**: `{ r: 0.816, g: 0.973, b: 0.671 }` (green-light/200)
-- **Inner shadow**: `{ r: 0.196, g: 0.384, b: 0.071 }` (green-light/800)
+- **Standard** (Avia Aces style): 339x56, cornerRadius 16, fontSize 20
+- **Large** (Bumblebee style): 337.5x104, cornerRadius 12, fontSize 32
+- Adjust dimensions to fit your game's visual weight
 
 ---
 
@@ -114,7 +126,7 @@ iconBtn.resize(48, 48);
 iconBtn.paddingLeft = 8; iconBtn.paddingRight = 8;
 iconBtn.paddingTop = 8; iconBtn.paddingBottom = 8;
 iconBtn.cornerRadius = 12;
-iconBtn.fills = [{ type: 'SOLID', color: { r: 0.122, g: 0.137, b: 0.357 } }]; // SURFACE_PRIMARY
+iconBtn.fills = [{ type: 'SOLID', color: SURFACE }];  // Theme: SURFACE_PRIMARY
 
 // Icon placeholder (24x24 frame or imported SVG)
 const iconFrame = figma.createFrame();
@@ -133,6 +145,8 @@ return { iconBtnId: iconBtn.id };
 The persistent top bar. Contains: [Sound Button] + [Info Stack] + [Close Button].
 
 ```js
+await figma.loadFontAsync(FONT);
+
 const header = figma.createFrame();
 header.name = "Header";
 header.layoutMode = "HORIZONTAL";
@@ -152,7 +166,7 @@ const stack = figma.createFrame();
 stack.name = "stack";
 stack.layoutMode = "VERTICAL";
 stack.cornerRadius = 12;
-stack.fills = [{ type: 'SOLID', color: { r: 0.122, g: 0.137, b: 0.357 } }]; // SURFACE_PRIMARY
+stack.fills = [{ type: 'SOLID', color: SURFACE }];  // Theme: SURFACE_PRIMARY
 header.appendChild(stack);
 stack.layoutSizingHorizontal = "FILL"; // AFTER appendChild
 
@@ -165,7 +179,7 @@ topRow.counterAxisAlignItems = "CENTER";
 topRow.paddingLeft = 8; topRow.paddingRight = 8;
 topRow.paddingTop = 4; topRow.paddingBottom = 4;
 topRow.fills = [];
-topRow.strokes = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1, a: 0.1 } }]; // subtle border-bottom
+topRow.strokes = [{ type: 'SOLID', color: { ...TEXT_PRIMARY, a: 0.1 } }]; // subtle border-bottom
 topRow.strokesIncludedInLayout = true;
 // Only bottom stroke:
 topRow.strokeBottomWeight = 1;
@@ -174,12 +188,11 @@ stack.appendChild(topRow);
 topRow.layoutSizingHorizontal = "FILL";
 
 // "Online: 1920" text
-await figma.loadFontAsync({ family: "Janda Manatee Solid Cyrillic", style: "Regular" });
 const onlineText = figma.createText();
 onlineText.characters = "Online: 1920";
 onlineText.fontSize = 14;
-onlineText.fontName = { family: "Janda Manatee Solid Cyrillic", style: "Regular" };
-onlineText.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
+onlineText.fontName = FONT;
+onlineText.fills = [{ type: 'SOLID', color: TEXT_PRIMARY }];
 onlineText.letterSpacing = { unit: "PIXELS", value: -0.56 };
 onlineText.textCase = "UPPER";
 topRow.appendChild(onlineText);
@@ -199,8 +212,8 @@ bottomRow.layoutSizingHorizontal = "FILL";
 const balanceLabel = figma.createText();
 balanceLabel.characters = "Balance:";
 balanceLabel.fontSize = 14;
-balanceLabel.fontName = { family: "Janda Manatee Solid Cyrillic", style: "Regular" };
-balanceLabel.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
+balanceLabel.fontName = FONT;
+balanceLabel.fills = [{ type: 'SOLID', color: TEXT_PRIMARY }];
 balanceLabel.letterSpacing = { unit: "PIXELS", value: -0.56 };
 balanceLabel.textCase = "UPPER";
 bottomRow.appendChild(balanceLabel);
@@ -208,8 +221,8 @@ bottomRow.appendChild(balanceLabel);
 const balanceAmount = figma.createText();
 balanceAmount.characters = "$ 1000";
 balanceAmount.fontSize = 14;
-balanceAmount.fontName = { family: "Janda Manatee Solid Cyrillic", style: "Regular" };
-balanceAmount.fills = [{ type: 'SOLID', color: { r: 0.643, g: 0.737, b: 0.992 } }]; // TEXT_SECONDARY
+balanceAmount.fontName = FONT;
+balanceAmount.fills = [{ type: 'SOLID', color: TEXT_SECONDARY }];  // Theme: TEXT_SECONDARY
 balanceAmount.letterSpacing = { unit: "PIXELS", value: -0.56 };
 bottomRow.appendChild(balanceAmount);
 
@@ -227,6 +240,8 @@ return { headerId: header.id };
 A menu row with icon + label + chevron. Used for "My Bets", "Leaderboard", "Game Rules", etc.
 
 ```js
+await figma.loadFontAsync(FONT);
+
 const row = figma.createFrame();
 row.name = "Row";
 row.layoutMode = "HORIZONTAL";
@@ -241,16 +256,15 @@ row.fills = []; // Transparent
 const icon = figma.createFrame();
 icon.name = "Icon";
 icon.resize(20, 20);
-icon.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }]; // White placeholder
+icon.fills = [{ type: 'SOLID', color: TEXT_PRIMARY }]; // Placeholder
 row.appendChild(icon);
 
 // Label text (flex-grow)
-await figma.loadFontAsync({ family: "Janda Manatee Solid Cyrillic", style: "Regular" });
 const label = figma.createText();
 label.characters = "Leaderboard";
 label.fontSize = 16;
-label.fontName = { family: "Janda Manatee Solid Cyrillic", style: "Regular" };
-label.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
+label.fontName = FONT;
+label.fills = [{ type: 'SOLID', color: TEXT_PRIMARY }];
 label.letterSpacing = { unit: "PIXELS", value: -0.64 };
 label.textCase = "UPPER";
 row.appendChild(label);
@@ -260,7 +274,7 @@ label.layoutSizingHorizontal = "FILL";
 const chevron = figma.createFrame();
 chevron.name = "CaretRight";
 chevron.resize(20, 20);
-chevron.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1, a: 0.4 } }]; // Muted
+chevron.fills = [{ type: 'SOLID', color: { ...TEXT_PRIMARY, a: 0.4 } }]; // Muted
 row.appendChild(chevron);
 
 return { rowId: row.id };
@@ -291,23 +305,23 @@ switcher.paddingTop = 2; switcher.paddingBottom = 2;
 switcher.cornerRadius = 9999;  // Pill shape
 
 // OFF state:
-switcher.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1, a: 0.06 } }]; // white/6
+switcher.fills = [{ type: 'SOLID', color: { ...TEXT_PRIMARY, a: 0.06 } }]; // white/6
 
 // Knob
 const knob = figma.createEllipse();
 knob.name = "knob";
 knob.resize(26, 20);
 knob.cornerRadius = 32;
-knob.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }]; // white
+knob.fills = [{ type: 'SOLID', color: TEXT_PRIMARY }]; // white
 knob.effects = [
   { type: 'DROP_SHADOW', color: { r: 0, g: 0, b: 0, a: 0.3 }, offset: { x: 0, y: 1 }, radius: 2, visible: true }
 ];
 switcher.appendChild(knob);
 
 // For ON state, change:
-//   switcher.fills → indigo/500 { r: 0.380, g: 0.447, b: 0.953 }
-//   knob.fills → indigo/25 { r: 0.961, g: 0.973, b: 1.000 }
-//   knob shadow → 0px 0px 3px indigo/200
+//   switcher.fills -> TOGGLE_ON_BG from theme
+//   knob.fills -> TOGGLE_ON_KNOB from theme
+//   knob shadow -> 0px 0px 3px (lighter version of TOGGLE_ON_BG)
 //   switcher.primaryAxisAlignItems = "MAX"  (knob to right)
 
 return { switcherId: switcher.id };
@@ -320,6 +334,8 @@ return { switcherId: switcher.id };
 Small tab button for quick-pick amounts or view switching.
 
 ```js
+await figma.loadFontAsync(FONT);
+
 const tab = figma.createFrame();
 tab.name = "Tab / 32px";
 tab.layoutMode = "HORIZONTAL";
@@ -329,21 +345,20 @@ tab.resize(80, 32);  // Width varies with content
 tab.paddingLeft = 12; tab.paddingRight = 12;
 tab.paddingTop = 14; tab.paddingBottom = 14;
 tab.cornerRadius = 12;
-tab.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1, a: 0.06 } }]; // white/6 (inactive)
+tab.fills = [{ type: 'SOLID', color: { ...TEXT_PRIMARY, a: 0.06 } }]; // subtle bg (inactive)
 
-await figma.loadFontAsync({ family: "Janda Manatee Solid Cyrillic", style: "Regular" });
 const tabLabel = figma.createText();
 tabLabel.characters = "5";
 tabLabel.fontSize = 18;
-tabLabel.fontName = { family: "Janda Manatee Solid Cyrillic", style: "Regular" };
-tabLabel.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
+tabLabel.fontName = FONT;
+tabLabel.fills = [{ type: 'SOLID', color: TEXT_PRIMARY }];
 tabLabel.letterSpacing = { unit: "PIXELS", value: -0.72 };
 tabLabel.textCase = "UPPER";
 tabLabel.textAlignHorizontal = "CENTER";
 tab.appendChild(tabLabel);
 
-// For ACTIVE state: change fills to accent color or add border
-// tab.fills = [{ type: 'SOLID', color: { r: 0.380, g: 0.447, b: 0.953, a: 0.2 } }];
+// For ACTIVE state: use TOGGLE_ON_BG or ACCENT color at ~20% opacity
+// tab.fills = [{ type: 'SOLID', color: { ...TOGGLE_ON_BG, a: 0.2 } }];
 
 return { tabId: tab.id };
 ```
@@ -355,6 +370,8 @@ return { tabId: tab.id };
 Bet amount input with minus/plus buttons.
 
 ```js
+await figma.loadFontAsync(FONT);
+
 const input = figma.createFrame();
 input.name = "Unput L";
 input.layoutMode = "HORIZONTAL";
@@ -364,8 +381,8 @@ input.resize(335, 48);
 input.paddingLeft = 8; input.paddingRight = 8;
 input.paddingTop = 8; input.paddingBottom = 8;
 input.cornerRadius = 12;
-input.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1, a: 0.05 } }]; // white/5
-input.strokes = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1, a: 0.2 } }]; // white/20
+input.fills = [{ type: 'SOLID', color: { ...TEXT_PRIMARY, a: 0.05 } }]; // SURFACE_INPUT
+input.strokes = [{ type: 'SOLID', color: { ...TEXT_PRIMARY, a: 0.2 } }]; // SURFACE_BORDER
 input.strokeWeight = 1;
 
 // Minus button (32x32 mini CTA — same gradient/shadow as main Button but smaller)
@@ -378,31 +395,32 @@ minusBtn.primaryAxisAlignItems = "CENTER";
 minusBtn.counterAxisAlignItems = "CENTER";
 minusBtn.clipsContent = true;
 minusBtn.strokeWeight = 2;
-minusBtn.strokes = [{ type: 'SOLID', color: { r: 0.643, g: 0.737, b: 0.992 } }]; // indigo/300
+minusBtn.strokes = [{ type: 'SOLID', color: ACCENT_BORDER }];
 minusBtn.fills = [{
   type: 'GRADIENT_LINEAR',
   gradientStops: [
-    { position: 0, color: { r: 0.082, g: 0.439, b: 0.937, a: 1 } }, // blue/600
-    { position: 1, color: { r: 0.267, g: 0.298, b: 0.906, a: 1 } }  // indigo/600
+    { position: 0, color: { ...ACCENT_FROM, a: 1 } },
+    { position: 1, color: { ...ACCENT_TO, a: 1 } }
   ],
   gradientTransform: [[0, 1, 0], [-1, 0, 1]]
 }];
+// Shadow stack — same structure as Button, colors from theme
 minusBtn.effects = [
-  { type: 'DROP_SHADOW', color: { r: 0.012, g: 0.016, b: 0.031, a: 0.3 }, offset: { x: 0, y: 4 }, radius: 3, visible: true },
-  { type: 'DROP_SHADOW', color: { r: 0.063, g: 0.165, b: 0.337, a: 1 }, offset: { x: 0, y: 2 }, radius: 0, visible: true },
-  { type: 'DROP_SHADOW', color: { r: 0.502, g: 0.596, b: 0.976, a: 1 }, offset: { x: 0, y: 0 }, radius: 22, visible: true },
-  { type: 'INNER_SHADOW', color: { r: 0.780, g: 0.843, b: 0.996, a: 1 }, offset: { x: 0, y: 3 }, radius: 1, visible: true },
-  { type: 'INNER_SHADOW', color: { r: 0.208, g: 0.220, b: 0.804, a: 1 }, offset: { x: 0, y: -3 }, radius: 1, visible: true },
+  { type: 'DROP_SHADOW', color: { ...SHADOW_SOFT, a: 0.3 }, offset: { x: 0, y: 4 }, radius: 3, visible: true },
+  { type: 'DROP_SHADOW', color: { ...DEEP_SHADOW, a: 1 }, offset: { x: 0, y: 2 }, radius: 0, visible: true },
+  { type: 'DROP_SHADOW', color: { ...ACCENT_GLOW, a: 1 }, offset: { x: 0, y: 0 }, radius: 22, visible: true },
+  { type: 'INNER_SHADOW', color: { ...INNER_HIGHLIGHT, a: 1 }, offset: { x: 0, y: 3 }, radius: 1, visible: true },
+  { type: 'INNER_SHADOW', color: { ...INNER_SHADOW_C, a: 1 }, offset: { x: 0, y: -3 }, radius: 1, visible: true },
 ];
-// Add "−" text or line inside
+// Add "-" text or line inside
 input.appendChild(minusBtn);
 
 // Amount text (centered, flex-grow)
 const amountText = figma.createText();
 amountText.characters = "$ 50";
 amountText.fontSize = 22;
-amountText.fontName = { family: "Janda Manatee Solid Cyrillic", style: "Regular" };
-amountText.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
+amountText.fontName = FONT;
+amountText.fills = [{ type: 'SOLID', color: TEXT_PRIMARY }];
 amountText.letterSpacing = { unit: "PIXELS", value: -0.88 };
 amountText.textCase = "UPPER";
 amountText.textAlignHorizontal = "CENTER";
@@ -435,6 +453,8 @@ Same as Input Large but:
 Label + Toggle row. Used for "Auto play" and similar binary settings.
 
 ```js
+await figma.loadFontAsync(FONT);
+
 const switchRow = figma.createFrame();
 switchRow.name = "Switch cells";
 switchRow.layoutMode = "HORIZONTAL";
@@ -446,8 +466,8 @@ switchRow.fills = [];
 const label = figma.createText();
 label.characters = "Auto play";
 label.fontSize = 14;
-label.fontName = { family: "Janda Manatee Solid Cyrillic", style: "Regular" };
-label.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
+label.fontName = FONT;
+label.fills = [{ type: 'SOLID', color: TEXT_PRIMARY }];
 label.letterSpacing = { unit: "PIXELS", value: -0.56 };
 label.textCase = "UPPER";
 switchRow.appendChild(label);
@@ -466,16 +486,18 @@ return { switchRowId: switchRow.id };
 The main menu container. Rounded card with two sections: settings (toggles) and navigation (links).
 
 ```js
+await figma.loadFontAsync(FONT);
+
 const panel = figma.createFrame();
 panel.name = "Menu Panel";
 panel.layoutMode = "VERTICAL";
 panel.resize(359, 400); // Height is HUG
 panel.layoutSizingVertical = "HUG";
 panel.cornerRadius = 16;
-panel.fills = [{ type: 'SOLID', color: { r: 0.122, g: 0.137, b: 0.357 } }]; // SURFACE_PRIMARY
+panel.fills = [{ type: 'SOLID', color: SURFACE }];  // Theme: SURFACE_PRIMARY
 panel.effects = [
-  { type: 'DROP_SHADOW', color: { r: 0.082, g: 0.439, b: 0.937, a: 1 }, offset: { x: 0, y: 0 }, radius: 36, visible: true }
-]; // Panel glow
+  { type: 'DROP_SHADOW', color: { ...ACCENT_FROM, a: 1 }, offset: { x: 0, y: 0 }, radius: 36, visible: true }
+]; // Panel glow — uses accent color
 
 // Title row
 const titleRow = figma.createFrame();
@@ -488,8 +510,8 @@ titleRow.layoutSizingHorizontal = "FILL";
 const title = figma.createText();
 title.characters = "MENU";
 title.fontSize = 24;
-title.fontName = { family: "Janda Manatee Solid Cyrillic", style: "Regular" };
-title.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
+title.fontName = FONT;
+title.fills = [{ type: 'SOLID', color: TEXT_PRIMARY }];
 title.letterSpacing = { unit: "PIXELS", value: -0.96 };
 title.textCase = "UPPER";
 titleRow.appendChild(title);
@@ -501,7 +523,7 @@ settingsSection.layoutMode = "VERTICAL";
 settingsSection.paddingLeft = 8; settingsSection.paddingRight = 8;
 settingsSection.paddingTop = 8; settingsSection.paddingBottom = 8;
 settingsSection.fills = [];
-settingsSection.strokes = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1, a: 0.06 } }];
+settingsSection.strokes = [{ type: 'SOLID', color: { ...TEXT_PRIMARY, a: 0.06 } }]; // SURFACE_DIVIDER
 settingsSection.strokeBottomWeight = 1;
 settingsSection.strokeTopWeight = 0; settingsSection.strokeLeftWeight = 0; settingsSection.strokeRightWeight = 0;
 panel.appendChild(settingsSection);
@@ -522,15 +544,15 @@ navSection.layoutSizingHorizontal = "FILL";
 return { panelId: panel.id };
 ```
 
-Menu items observed in Avia Aces (with icon names):
-1. Music — MusicNotes icon + Switcher
-2. Game Sounds — Joystick icon + Switcher
-3. UI Sounds — Headphones icon + Switcher
-4. My Bets — ClockCountdown icon + CaretRight
-5. Leaderboard — Trophy icon + CaretRight
-6. How to Play — Question icon + CaretRight
-7. Game Rules — FileText icon + CaretRight
-8. Provably Fair — ShieldCheck icon + CaretRight
+Menu items observed in reference boards (with icon names):
+1. Music -- MusicNotes icon + Switcher
+2. Game Sounds -- Joystick icon + Switcher
+3. UI Sounds -- Headphones icon + Switcher
+4. My Bets -- ClockCountdown icon + CaretRight
+5. Leaderboard -- Trophy icon + CaretRight
+6. How to Play -- Question icon + CaretRight
+7. Game Rules -- FileText icon + CaretRight
+8. Provably Fair -- ShieldCheck icon + CaretRight
 
 ---
 
@@ -558,10 +580,10 @@ card.cornerRadius = 16;
 card.paddingLeft = 16; card.paddingRight = 16;
 card.paddingTop = 16; card.paddingBottom = 16;
 card.itemSpacing = 12;
-card.fills = [{ type: 'SOLID', color: { r: 0.122, g: 0.137, b: 0.357 } }]; // SURFACE_PRIMARY
+card.fills = [{ type: 'SOLID', color: SURFACE }];  // Theme: SURFACE_PRIMARY
 card.effects = [
-  { type: 'DROP_SHADOW', color: { r: 0.082, g: 0.439, b: 0.937, a: 1 }, offset: { x: 0, y: 0 }, radius: 36, visible: true }
-];
+  { type: 'DROP_SHADOW', color: { ...ACCENT_FROM, a: 1 }, offset: { x: 0, y: 0 }, radius: 36, visible: true }
+]; // Panel glow
 backdrop.appendChild(card);
 
 // Add: title text, body text, action buttons inside card
@@ -571,7 +593,7 @@ return { backdropId: backdrop.id, cardId: card.id };
 
 For win celebration overlay specifically:
 - Backdrop opacity: 0.85
-- Win amount: 88px font size, white, text-shadow
+- Win amount: 88px font size, TEXT_PRIMARY color, text-shadow
 - Center the jp-win artwork above the amount text
 - "Collect" / "Continue" button at bottom
 
@@ -586,8 +608,8 @@ const cell = figma.createFrame();
 cell.name = "Grid Cell";
 cell.resize(186, 194);  // Alternates: 186x194 and 182x194
 cell.cornerRadius = 4;
-cell.fills = [{ type: 'SOLID', color: { r: 0.8, g: 0.65, b: 0.2, a: 0.3 } }]; // Gold/amber tint placeholder
-cell.strokes = [{ type: 'SOLID', color: { r: 0.8, g: 0.65, b: 0.2, a: 0.5 } }];
+cell.fills = [{ type: 'SOLID', color: SURFACE }];  // Theme: SURFACE_PRIMARY
+cell.strokes = [{ type: 'SOLID', color: { ...TEXT_PRIMARY, a: 0.1 } }]; // SURFACE_BORDER at 10%
 cell.strokeWeight = 1;
 
 // Symbol image goes inside as a child (absolute positioned, fills cell)

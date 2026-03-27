@@ -2,6 +2,10 @@
 
 Blueprints for each screen type. Build these by composing components from [component-recipes.md](component-recipes.md) and applying colors from [theme-system.md](theme-system.md).
 
+## Adapt to Context
+
+> **All color references in the code below use named theme variables** (PAGE_BACKGROUND, SURFACE, TEXT_PRIMARY, etc.). Before building any screen, define these variables with values derived from the game's identity. See [theme-system.md](theme-system.md) for the full token structure and example palettes. The layout structures, dimensions, and spacing below are the proven patterns -- colors and fonts should match the new game.
+
 ---
 
 ## 1. Main Game Screen (375 x 812)
@@ -21,13 +25,14 @@ The primary gameplay view. Player watches the game and places bets.
 |   - Flower grid + bees (Bumblebee)      |
 |   - Crash graph (crash games)           |
 |   - Slot reels (slot games)             |
+|   - YOUR GAME'S content here            |
 |                                         |
 +-----------------------------------------+
 | BETTING PANEL (bottom-fixed)            |
 | +-------------------------------------+ |
 | | [Unput L: $amount with +/- buttons] | | 48px
 | | [Tab row: 1  2  5  10]              | | 32px
-| | [—————— divider line ——————]        | |
+| | [---------- divider line ----------]| |
 | | [Auto play label] [Switcher]        | | 32px
 | | [========= BET BUTTON =========]    | | 56px
 | +-------------------------------------+ |
@@ -37,23 +42,27 @@ The primary gameplay view. Player watches the game and places bets.
 ### Construction Steps
 
 ```js
+// ═══ Theme variables — define before building ═══
+// See theme-system.md for full token list
+// Example values: Avia Aces indigo theme
+const FONT           = { family: "YOUR_GAME_FONT", style: "Regular" };
+const PAGE_BG        = { r: 0.094, g: 0.059, b: 0.502 };  // Example: deep indigo
+const SURFACE        = { r: 0.122, g: 0.137, b: 0.357 };  // Example: dark indigo panel
+// ... define all theme tokens ...
+
+await figma.loadFontAsync(FONT);
+
 // 1. Page wrapper
 const screen = figma.createFrame();
 screen.name = "Main Game";
 screen.resize(375, 812);
 screen.layoutMode = "VERTICAL";
-screen.fills = [{ type: 'SOLID', color: PAGE_BACKGROUND }];
+screen.fills = [{ type: 'SOLID', color: PAGE_BG }];
 screen.clipsContent = true;
 
 // 2. Background (absolute positioned, fills entire frame)
-// The MBg component in Avia Aces is a 375x812 frame with layered images:
-//   - Sky gradient (bg) at 0,0 — 375x792
-//   - Island image at 220,209 — 105x33
-//   - Aircraft carrier at 0,246 — 375x566
-//   - Plane on runway at 28,325 — 314x200
-//   - Rubber band at 34,248 — 309x26
-//   - Clouds at various positions — 310x108, 333x121
 // For new themes: replace with theme-appropriate layered background images
+// The reference boards use multi-layered background frames (sky, terrain, characters)
 
 // 3. Header (recipe from component-recipes.md)
 screen.appendChild(header);
@@ -85,7 +94,7 @@ panelInner.itemSpacing = 8;
 panelInner.paddingLeft = 12; panelInner.paddingRight = 12;
 panelInner.paddingTop = 12; panelInner.paddingBottom = 12;
 panelInner.cornerRadius = 16;
-panelInner.fills = [{ type: 'SOLID', color: SURFACE_PRIMARY }];
+panelInner.fills = [{ type: 'SOLID', color: SURFACE }];
 bettingPanel.appendChild(panelInner);
 panelInner.layoutSizingHorizontal = "FILL";
 
@@ -110,16 +119,16 @@ Settings and navigation hub.
 |  | MENU (title)                      |  |
 |  |-----------------------------------|  |
 |  | Settings Section (border-bottom)  |  |
-|  | [🎵 Music]           [toggle]    |  | 48px each
-|  | [🎮 Game Sounds]     [toggle]    |  |
-|  | [🎧 UI Sounds]       [toggle]    |  |
+|  | [icon]  Music          [toggle]   |  | 48px each
+|  | [icon]  Game Sounds    [toggle]   |  |
+|  | [icon]  UI Sounds      [toggle]   |  |
 |  |-----------------------------------|  |
 |  | Navigation Section               |  |
-|  | [🕐 My Bets]              [>]   |  | 48px each
-|  | [🏆 Leaderboard]          [>]   |  |
-|  | [❓ How to Play]          [>]   |  |
-|  | [📄 Game Rules]           [>]   |  |
-|  | [🛡 Provably Fair]        [>]   |  |
+|  | [icon]  My Bets             [>]  |  | 48px each
+|  | [icon]  Leaderboard         [>]  |  |
+|  | [icon]  How to Play         [>]  |  |
+|  | [icon]  Game Rules          [>]  |  |
+|  | [icon]  Provably Fair       [>]  |  |
 |  |-----------------------------------|  |
 |  | Powered by [logo]                |  | 40px
 |  +-----------------------------------+  |
@@ -130,9 +139,9 @@ Settings and navigation hub.
 ### Key Properties
 - Menu panel: positioned at left 8px, top 74px (below header)
 - Width: 359px (375 - 16px padding)
-- Background: SURFACE_PRIMARY with glow shadow
+- Background: SURFACE with glow shadow (ACCENT color)
 - Corner radius: 16px
-- Sections divided by border-bottom (white/6)
+- Sections divided by border-bottom (SURFACE_DIVIDER)
 
 ---
 
@@ -151,7 +160,7 @@ First screen the player sees.
 |    [Optional: game preview image]       |
 |                                         |
 |                                         |
-|         ████████████░░░░ 72%            | Loading bar
+|         xxxxxxxxxx------ 72%            | Loading bar
 |              or                         |
 |        [PRESS TO START]                 | Button CTA
 |                                         |
@@ -160,11 +169,12 @@ First screen the player sees.
 
 ### Loading Bar Construction
 ```js
+// Theme variables for gradient and glow
 const barBg = figma.createFrame();
 barBg.name = "Loading Bar BG";
 barBg.resize(280, 12);
 barBg.cornerRadius = 6;
-barBg.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1, a: 0.1 } }];
+barBg.fills = [{ type: 'SOLID', color: { ...TEXT_PRIMARY, a: 0.1 } }]; // subtle white bg
 
 const barFill = figma.createFrame();
 barFill.name = "Loading Bar Fill";
@@ -173,8 +183,8 @@ barFill.cornerRadius = 6;
 barFill.fills = [{
   type: 'GRADIENT_LINEAR',
   gradientStops: [
-    { position: 0, color: ACCENT_GRADIENT_FROM_WITH_ALPHA },
-    { position: 1, color: ACCENT_GRADIENT_TO_WITH_ALPHA }
+    { position: 0, color: { ...ACCENT_FROM, a: 1 } },
+    { position: 1, color: { ...ACCENT_TO, a: 1 } }
   ],
   gradientTransform: [[1, 0, 0], [0, 1, 0]]
 }];
@@ -216,7 +226,7 @@ subHeader.counterAxisAlignItems = "CENTER";
 subHeader.resize(375, 48);
 subHeader.paddingLeft = 8; subHeader.paddingRight = 8;
 subHeader.itemSpacing = 8;
-subHeader.fills = [{ type: 'SOLID', color: SURFACE_PRIMARY }];
+subHeader.fills = [{ type: 'SOLID', color: SURFACE }];
 
 // Back button (Button Icon 32px with left arrow)
 // Title text (flex-grow, centered, 20px)
@@ -234,7 +244,7 @@ tabBar.itemSpacing = 4;
 tabBar.fills = [];
 
 // Add Tab / 32px instances with labels: "All Time", "Today", "This Week"
-// Active tab: different fill or underline
+// Active tab: TOGGLE_ON_BG fill or underline
 ```
 
 ### Table Row (data)
@@ -255,7 +265,7 @@ dataRow.fills = [];
 // Multiplier (fixed 40px)
 // Payout (fixed 80px, green for win / red for loss)
 
-// Alternate row background: every other row gets white/3 fill
+// Alternate row background: every other row gets subtle tinted fill
 ```
 
 ---
@@ -334,26 +344,28 @@ Appears on top of the game when player wins.
 
 ```
 +------------------------------------------+
-|  ████ DARK OVERLAY rgba(0,0,0,0.85) ████ |
-|  ██                                  ███ |
-|  ██     [JACKPOT MEGA title]         ███ |
-|  ██     [Prize box artwork]          ███ |
-|  ██                                  ███ |
-|  ██        $ 335.23                  ███ |
-|  ██     (88px, white, shadow)        ███ |
-|  ██                                  ███ |
-|  ██       [TAP CONTINUE]            ███ |
-|  ████████████████████████████████████████ |
+|  xxxx DARK OVERLAY rgba(0,0,0,0.85) xxxx |
+|  xx                                  xxx |
+|  xx     [JACKPOT MEGA title]         xxx |
+|  xx     [Prize box artwork]          xxx |
+|  xx                                  xxx |
+|  xx        $ 335.23                  xxx |
+|  xx     (88px, white, shadow)        xxx |
+|  xx                                  xxx |
+|  xx       [TAP CONTINUE]            xxx |
+|  xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx |
 +------------------------------------------+
 ```
 
 ### Win Amount Text
 ```js
+await figma.loadFontAsync(FONT);
+
 const winAmount = figma.createText();
 winAmount.characters = "$ 335.23";
 winAmount.fontSize = 88;
-winAmount.fontName = { family: "Janda Manatee Solid Cyrillic", style: "Regular" };
-winAmount.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
+winAmount.fontName = FONT;
+winAmount.fills = [{ type: 'SOLID', color: TEXT_PRIMARY }];
 winAmount.textCase = "UPPER";
 winAmount.textAlignHorizontal = "CENTER";
 // Text shadow applied via effects on a containing frame
@@ -414,7 +426,7 @@ Scrollable rich text with optional illustrations.
 |  SCROLLABLE CONTENT (clipsContent)      |
 |                                         |
 |  How to Play                            |
-|  ─────────────────────────────          |
+|  --------------------------------       |
 |  1. Set your bet amount                 |
 |  2. Press the Start button              |
 |  3. Watch the multiplier rise           |
@@ -423,7 +435,7 @@ Scrollable rich text with optional illustrations.
 |  [Illustration frame placeholder]       |
 |                                         |
 |  Payout Rules                           |
-|  ─────────────────────────────          |
+|  --------------------------------       |
 |  - Min bet: $1                          |
 |  - Max bet: $1000                       |
 |  - Max win: 32x                         |

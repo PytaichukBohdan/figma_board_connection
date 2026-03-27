@@ -9,6 +9,10 @@ Build data tables for leaderboard rankings and bet history. Includes a tab bar f
 
 **Load [figma-use](../figma-use/SKILL.md) before any `use_figma` call.**
 
+## Adapt to Context
+
+> **All color values and the font name below are EXAMPLES** from the Avia Aces (indigo/blue) reference board. When building for a different game, derive all theme variables from the game's identity. The table *structure* (column layout, row heights, tab bar pattern, alternating row treatment) is the reusable pattern. The specific colors and font should match the new game. Win/loss status colors (green/red) are conventional and usually work across themes, but can be adjusted to match the game's palette.
+
 ## Visual Structure
 
 ```
@@ -25,22 +29,24 @@ Build data tables for leaderboard rankings and bet history. Includes a tab bar f
 +----------------------------------------------------+
 ```
 
-## Colors (Inline)
+## Theme Variables (define before use)
 
-| Token | Figma 0-1 | Hex |
-|-------|-----------|-----|
-| Surface (indigo/950) | `{ r: 0.122, g: 0.137, b: 0.357 }` | #1f235b |
-| White | `{ r: 1, g: 1, b: 1 }` | #ffffff |
-| Text secondary (indigo/300) | `{ r: 0.643, g: 0.737, b: 0.992 }` | #a4bcfd |
-| Surface subtle (white/6) | `{ r: 1, g: 1, b: 1, a: 0.06 }` | — |
-| Tab active bg | `{ r: 0.380, g: 0.447, b: 0.953 }` | #6172f3 |
-| Win (green) | `{ r: 0.2, g: 0.8, b: 0.3 }` | #33cc4d |
-| Loss (red) | `{ r: 0.9, g: 0.2, b: 0.2 }` | #e63333 |
-| Row alt bg (white/3) | `{ r: 1, g: 1, b: 1, a: 0.03 }` | — |
+```js
+// ═══ Theme variables — derive these from the game's context ═══
+// Example values shown are from Avia Aces (indigo/blue aviation theme)
+const FONT           = { family: "YOUR_GAME_FONT", style: "Regular" };
+// Example: { family: "Janda Manatee Solid Cyrillic", style: "Regular" }
 
-## Font
-
-**"Janda Manatee Solid Cyrillic"**, Regular. Fallback: "Inter" Regular.
+const SURFACE        = /* derive */;  // Example: { r: 0.122, g: 0.137, b: 0.357 }
+const TEXT_PRIMARY   = /* derive */;  // Example: { r: 1, g: 1, b: 1 }
+const TEXT_SECONDARY = /* derive */;  // Example: { r: 0.643, g: 0.737, b: 0.992 }
+const TOGGLE_ON_BG   = /* derive */;  // Example: { r: 0.380, g: 0.447, b: 0.953 } — for active tab
+// Status colors (conventional, but adjustable):
+const WIN_COLOR      = { r: 0.2, g: 0.8, b: 0.3 };   // green for wins
+const LOSS_COLOR     = { r: 0.9, g: 0.2, b: 0.2 };   // red for losses
+// SURFACE_SUBTLE:   { ...TEXT_PRIMARY, a: 0.06 }
+// ROW_ALT_BG:       { ...TEXT_PRIMARY, a: 0.03 }
+```
 
 ## Column Definitions
 
@@ -73,7 +79,7 @@ function createTabBar(tabs, activeIndex) {
   bar.paddingLeft = 4; bar.paddingRight = 4;
   bar.paddingTop = 4; bar.paddingBottom = 4;
   bar.cornerRadius = 12;
-  bar.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 }, opacity: 0.06 }];
+  bar.fills = [{ type: 'SOLID', color: TEXT_PRIMARY, opacity: 0.06 }]; // SURFACE_SUBTLE
 
   tabs.forEach((tabName, i) => {
     const tab = figma.createFrame();
@@ -86,7 +92,7 @@ function createTabBar(tabs, activeIndex) {
     tab.paddingLeft = 12; tab.paddingRight = 12;
 
     if (i === activeIndex) {
-      tab.fills = [{ type: 'SOLID', color: { r: 0.380, g: 0.447, b: 0.953 } }];
+      tab.fills = [{ type: 'SOLID', color: TOGGLE_ON_BG }]; // active tab color
     } else {
       tab.fills = [];
     }
@@ -97,8 +103,8 @@ function createTabBar(tabs, activeIndex) {
     const lbl = figma.createText();
     lbl.characters = tabName;
     lbl.fontSize = 12;
-    lbl.fontName = { family: "Janda Manatee Solid Cyrillic", style: "Regular" };
-    lbl.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
+    lbl.fontName = FONT;
+    lbl.fills = [{ type: 'SOLID', color: TEXT_PRIMARY }];
     lbl.textAlignHorizontal = "CENTER";
     tab.appendChild(lbl);
   });
@@ -119,7 +125,7 @@ function createHeaderRow(columns) {
   row.paddingLeft = 8; row.paddingRight = 8;
   row.itemSpacing = 4;
   row.fills = [];
-  row.strokes = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 }, opacity: 0.06 }];
+  row.strokes = [{ type: 'SOLID', color: TEXT_PRIMARY, opacity: 0.06 }]; // SURFACE_DIVIDER
   row.strokeBottomWeight = 1;
   row.strokeTopWeight = 0; row.strokeLeftWeight = 0; row.strokeRightWeight = 0;
 
@@ -127,8 +133,8 @@ function createHeaderRow(columns) {
     const cell = figma.createText();
     cell.characters = col.label;
     cell.fontSize = 12;
-    cell.fontName = { family: "Janda Manatee Solid Cyrillic", style: "Regular" };
-    cell.fills = [{ type: 'SOLID', color: { r: 0.643, g: 0.737, b: 0.992 } }];
+    cell.fontName = FONT;
+    cell.fills = [{ type: 'SOLID', color: TEXT_SECONDARY }];
     cell.textAlignHorizontal = col.align || "LEFT";
     row.appendChild(cell);
 
@@ -157,7 +163,7 @@ function createDataRow(values, columns, isAlt, isWin) {
 
   // Alternating background
   if (isAlt) {
-    row.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 }, opacity: 0.03 }];
+    row.fills = [{ type: 'SOLID', color: TEXT_PRIMARY, opacity: 0.03 }]; // ROW_ALT_BG
   } else {
     row.fills = [];
   }
@@ -167,19 +173,19 @@ function createDataRow(values, columns, isAlt, isWin) {
     const cell = figma.createText();
     cell.characters = String(val);
     cell.fontSize = 14;
-    cell.fontName = { family: "Janda Manatee Solid Cyrillic", style: "Regular" };
+    cell.fontName = FONT;
     cell.textAlignHorizontal = col.align || "LEFT";
     row.appendChild(cell);
 
     // Color logic: payout column uses win/loss colors
     if (col.label === "Payout" || col.label === "Status") {
       if (isWin) {
-        cell.fills = [{ type: 'SOLID', color: { r: 0.2, g: 0.8, b: 0.3 } }]; // green
+        cell.fills = [{ type: 'SOLID', color: WIN_COLOR }];
       } else {
-        cell.fills = [{ type: 'SOLID', color: { r: 0.9, g: 0.2, b: 0.2 } }]; // red
+        cell.fills = [{ type: 'SOLID', color: LOSS_COLOR }];
       }
     } else {
-      cell.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
+      cell.fills = [{ type: 'SOLID', color: TEXT_PRIMARY }];
     }
 
     if (col.width === "FILL") {
@@ -196,7 +202,7 @@ function createDataRow(values, columns, isAlt, isWin) {
 ## Full Leaderboard Table Construction
 
 ```js
-await figma.loadFontAsync({ family: "Janda Manatee Solid Cyrillic", style: "Regular" });
+await figma.loadFontAsync(FONT);
 
 // ── Table wrapper ──
 const table = figma.createFrame();
@@ -250,9 +256,9 @@ return { tableId: table.id };
 ## Assembly Notes
 
 - Table is 359px wide (fits inside a 375px mobile frame with 8px horizontal margin).
-- Tab bar: white/6 container with equal-width tabs. Active tab gets indigo/500 fill.
-- Header row: 32px height, bottom border white/6, column labels in indigo/300 at 12px.
-- Data rows: 48px height, alternating white/3 background, text at 14px.
-- Payout/Status column uses conditional colors: green `{r:0.2,g:0.8,b:0.3}` for wins, red `{r:0.9,g:0.2,b:0.2}` for losses.
-- All other text is white.
+- Tab bar: SURFACE_SUBTLE container with equal-width tabs. Active tab gets TOGGLE_ON_BG fill.
+- Header row: 32px height, bottom border SURFACE_DIVIDER, column labels in TEXT_SECONDARY at 12px.
+- Data rows: 48px height, alternating ROW_ALT_BG background, text at 14px.
+- Payout/Status column uses conditional colors: WIN_COLOR for wins, LOSS_COLOR for losses.
+- All other text is TEXT_PRIMARY.
 - Columns use fixed widths except "Player" which is FILL (flex grow).

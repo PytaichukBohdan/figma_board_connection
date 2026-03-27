@@ -9,31 +9,37 @@ The persistent top bar on every game screen. Contains: [Sound Button] + [Info St
 
 **Load [figma-use](../figma-use/SKILL.md) before any `use_figma` call.**
 
+## Adapt to Context
+
+> **All color values and the font name below are EXAMPLES** from the Avia Aces (indigo/blue) reference board. When building for a different game, derive SURFACE, TEXT_PRIMARY, TEXT_SECONDARY, and FONT from the game's theme. The header *structure* (dimensions, auto-layout, padding, spacing, stroke pattern) is the reusable pattern.
+
 ## Visual Structure
 
 ```
 +---[375px]-----------------------------------------------+
 | [Sound]  [Online: 1920  |  D***4 +200] [X Close] |  64px
-|          [💰 Balance:   |      $ 1000]            |
+|          [Balance:      |      $ 1000]            |
 +----------------------------------------------------------+
 ```
 
-## Colors (Palette A — Indigo/Blue)
+## Theme Variables (define before use)
 
-| Token | Value |
-|-------|-------|
-| Surface | `{ r: 0.122, g: 0.137, b: 0.357 }` (#1f235b) |
-| Text primary | `{ r: 1, g: 1, b: 1 }` (white) |
-| Text secondary | `{ r: 0.643, g: 0.737, b: 0.992 }` (#a4bcfd) |
-| Divider | `{ r: 1, g: 1, b: 1, a: 0.1 }` |
+```js
+// ═══ Theme variables — derive these from the game's context ═══
+// Example values shown are from Avia Aces (indigo/blue aviation theme)
+const FONT      = { family: "YOUR_GAME_FONT", style: "Regular" };
+// Example: { family: "Janda Manatee Solid Cyrillic", style: "Regular" }
+
+const SURFACE        = /* derive */;  // Example (Avia Aces): { r: 0.122, g: 0.137, b: 0.357 }
+const TEXT_PRIMARY   = /* derive */;  // Example: { r: 1, g: 1, b: 1 } (white)
+const TEXT_SECONDARY = /* derive */;  // Example (Avia Aces): { r: 0.643, g: 0.737, b: 0.992 }
+// Divider: { ...TEXT_PRIMARY, a: 0.1 } — usually works universally
+```
 
 ## Construction
 
 ```js
-await figma.loadFontAsync({ family: "Janda Manatee Solid Cyrillic", style: "Regular" });
-const SURFACE = { r: 0.122, g: 0.137, b: 0.357 };
-const WHITE = { r: 1, g: 1, b: 1 };
-const SECONDARY = { r: 0.643, g: 0.737, b: 0.992 };
+await figma.loadFontAsync(FONT);
 
 // Header wrapper
 const header = figma.createFrame();
@@ -77,7 +83,7 @@ topRow.counterAxisAlignItems = "CENTER";
 topRow.paddingLeft = 8; topRow.paddingRight = 8;
 topRow.paddingTop = 4; topRow.paddingBottom = 4;
 topRow.fills = [];
-topRow.strokes = [{ type: 'SOLID', color: { ...WHITE, a: 0.1 } }];
+topRow.strokes = [{ type: 'SOLID', color: { ...TEXT_PRIMARY, a: 0.1 } }];
 topRow.strokeBottomWeight = 1;
 topRow.strokeTopWeight = 0; topRow.strokeLeftWeight = 0; topRow.strokeRightWeight = 0;
 stack.appendChild(topRow);
@@ -86,8 +92,8 @@ topRow.layoutSizingHorizontal = "FILL";
 const onlineText = figma.createText();
 onlineText.characters = "Online: 1920";
 onlineText.fontSize = 14;
-onlineText.fontName = { family: "Janda Manatee Solid Cyrillic", style: "Regular" };
-onlineText.fills = [{ type: 'SOLID', color: WHITE }];
+onlineText.fontName = FONT;
+onlineText.fills = [{ type: 'SOLID', color: TEXT_PRIMARY }];
 onlineText.letterSpacing = { unit: "PIXELS", value: -0.56 };
 onlineText.textCase = "UPPER";
 topRow.appendChild(onlineText);
@@ -95,8 +101,8 @@ topRow.appendChild(onlineText);
 const lastWin = figma.createText();
 lastWin.characters = "D***4 +200";
 lastWin.fontSize = 14;
-lastWin.fontName = { family: "Janda Manatee Solid Cyrillic", style: "Regular" };
-lastWin.fills = [{ type: 'SOLID', color: SECONDARY }];
+lastWin.fontName = FONT;
+lastWin.fills = [{ type: 'SOLID', color: TEXT_SECONDARY }];
 lastWin.letterSpacing = { unit: "PIXELS", value: -0.56 };
 topRow.appendChild(lastWin);
 
@@ -115,8 +121,8 @@ bottomRow.layoutSizingHorizontal = "FILL";
 const balanceLabel = figma.createText();
 balanceLabel.characters = "Balance:";
 balanceLabel.fontSize = 14;
-balanceLabel.fontName = { family: "Janda Manatee Solid Cyrillic", style: "Regular" };
-balanceLabel.fills = [{ type: 'SOLID', color: WHITE }];
+balanceLabel.fontName = FONT;
+balanceLabel.fills = [{ type: 'SOLID', color: TEXT_PRIMARY }];
 balanceLabel.letterSpacing = { unit: "PIXELS", value: -0.56 };
 balanceLabel.textCase = "UPPER";
 bottomRow.appendChild(balanceLabel);
@@ -124,8 +130,8 @@ bottomRow.appendChild(balanceLabel);
 const balanceAmount = figma.createText();
 balanceAmount.characters = "$ 1000";
 balanceAmount.fontSize = 14;
-balanceAmount.fontName = { family: "Janda Manatee Solid Cyrillic", style: "Regular" };
-balanceAmount.fills = [{ type: 'SOLID', color: SECONDARY }];
+balanceAmount.fontName = FONT;
+balanceAmount.fills = [{ type: 'SOLID', color: TEXT_SECONDARY }];
 bottomRow.appendChild(balanceAmount);
 
 // Right: Close button (48x48)
